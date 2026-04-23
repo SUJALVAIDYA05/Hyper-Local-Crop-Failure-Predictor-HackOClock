@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import ScoreGauge from './ScoreGauge';
 import ChannelBar from './ChannelBar';
 import ForecastChart from './ForecastChart';
+import WeatherForecast from './WeatherForecast';
 import DistrictMap from '../Map/DistrictMap';
 
 export default function RiskDashboard() {
@@ -24,6 +25,11 @@ export default function RiskDashboard() {
   ];
 
   const mapCenter: [number, number] = district ? [district.lat, district.lon] : [15.3173, 75.7139];
+
+  // Data freshness: treat weather as the lead signal
+  const isDataFresh = weather.isFresh !== false && ndvi.isFresh !== false;
+  const freshnessLabel = isDataFresh ? 'LIVE' : 'CACHED';
+  const freshnessColor = isDataFresh ? '#22c55e' : '#facc15';
 
   return (
     <div style={{
@@ -104,6 +110,31 @@ export default function RiskDashboard() {
           <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>{crop?.icon} {crop?.name.en}</span>
           <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
           <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>{stage?.icon} {stage?.name.en}</span>
+          <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              color: freshnessColor,
+              fontFamily: 'Outfit, sans-serif',
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: freshnessColor,
+                boxShadow: `0 0 8px ${freshnessColor}`,
+              }}
+            />
+            {freshnessLabel}
+          </span>
         </motion.div>
 
         {/* === GEOSPATIAL FIELD VIEW === */}
@@ -262,7 +293,55 @@ export default function RiskDashboard() {
           ))}
         </motion.div>
 
-        {/* === 7-DAY FORECAST === */}
+        {/* === 7-DAY WEATHER STRIP === */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="glass"
+          style={{ padding: '1.25rem', marginBottom: '1.25rem' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '0.875rem',
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: 'Outfit, sans-serif',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                color: 'rgba(255,255,255,0.5)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+            >
+              7-Day Weather
+            </h3>
+            {weather.isFresh === false && (
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  color: '#facc15',
+                  fontWeight: 600,
+                  fontFamily: 'Outfit, sans-serif',
+                  background: 'rgba(250,204,21,0.1)',
+                  border: '1px solid rgba(250,204,21,0.25)',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '99px',
+                }}
+              >
+                Cached
+              </span>
+            )}
+          </div>
+          <WeatherForecast data={weather.forecast} />
+        </motion.div>
+
+        {/* === 7-DAY RISK FORECAST === */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

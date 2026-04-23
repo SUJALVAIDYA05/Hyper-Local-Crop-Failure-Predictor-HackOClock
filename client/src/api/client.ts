@@ -34,74 +34,59 @@ client.interceptors.response.use(
 );
 
 // ============================================================
-// Analysis API
+// Analysis API — aligned with ARCHITECTURE.md POST /api/analyze
 // ============================================================
 
-export interface AnalysisRequest {
-  district: string;
-  state: string;
-  crop: string;
-  growthStage: string;
-  language: Language;
+export interface AnalyzeRequest {
+  district: {
+    id: string;
+    name: string;
+    state: string;
+    lat: number;
+    lon: number;
+  };
+  crop: {
+    id: string;
+    name: string;
+  };
+  stage: {
+    id: string;
+    name: string;
+  };
 }
 
 export const analysisApi = {
-  async analyze(request: AnalysisRequest): Promise<AnalyzeResponse> {
-    const payload = {
-      district: request.district,
-      state: request.state,
-      crop: request.crop,
-      growthStage: request.growthStage,
-      language: request.language
-    };
-    const { data } = await client.post<AnalyzeResponse>('/api/analyze', payload);
+  async analyze(request: AnalyzeRequest): Promise<AnalyzeResponse> {
+    const { data } = await client.post<AnalyzeResponse>('/api/analyze', request);
     return data;
   },
 };
 
 // ============================================================
-// Recommendations API
+// Recommendations API — aligned with ARCHITECTURE.md POST /api/recommend
 // ============================================================
 
-export interface RecommendRequestPayload {
-  district: string;
-  crop: string;
-  growthStage: string;
-  riskPayload: {
-    droughtScore: number;
-    pestScore: number;
-    nutrientScore: number;
-    compositeScore: number;
-    droughtLevel: string;
-    pestLevel: string;
-    nutrientLevel: string;
-    droughtDriver: string;
-    pestDriver: string;
-    nutrientDriver: string;
-    weather: {
-      current: {
-        temperature: { max: number; min: number };
-        precipitation: { value: number };
-        humidity: { value: number };
-      };
-      forecast: unknown[];
-    };
-    ndvi: { value: number; anomaly: number; status: string } | null;
-    forecast7Day: unknown[];
+export interface RecommendRequest {
+  district: {
+    id: string;
+    name: string;
+    state: string;
   };
+  crop: {
+    id: string;
+    name: string;
+  };
+  stage: {
+    id: string;
+    name: string;
+  };
+  riskPayload: AnalyzeResponse['data'];
   language: Language;
 }
 
 export const recommendationsApi = {
-  async recommend(request: RecommendRequestPayload): Promise<RecommendResponse> {
-    const payload = {
-      district: request.district,
-      crop: request.crop,
-      growthStage: request.growthStage,
-      language: request.language,
-      riskPayload: request.riskPayload
-    };
-    const { data } = await client.post<RecommendResponse>('/api/recommend', payload);
+  async recommend(request: RecommendRequest): Promise<RecommendResponse> {
+    const { data } = await client.post<RecommendResponse>('/api/recommend', request);
     return data;
   },
 };

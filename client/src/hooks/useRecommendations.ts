@@ -1,36 +1,7 @@
 import { useState, useCallback } from 'react';
-import type { Language, RecommendResponse } from '../types';
-import { recommendationsApi } from '../api/client';
+import type { RecommendResponse } from '../types';
+import { recommendationsApi, type RecommendRequest } from '../api/client';
 import { getMockRecommendations } from '../data/staticData';
-
-export interface RecommendRequest {
-  district: string;
-  crop: string;
-  growthStage: string;
-  riskPayload: {
-    droughtScore: number;
-    pestScore: number;
-    nutrientScore: number;
-    compositeScore: number;
-    droughtLevel: string;
-    pestLevel: string;
-    nutrientLevel: string;
-    droughtDriver: string;
-    pestDriver: string;
-    nutrientDriver: string;
-    weather: {
-      current: {
-        temperature: { max: number; min: number };
-        precipitation: { value: number };
-        humidity: { value: number };
-      };
-      forecast: unknown[];
-    };
-    ndvi: { value: number; anomaly: number; status: string } | null;
-    forecast7Day: unknown[];
-  };
-  language: Language;
-}
 
 export interface UseRecommendationsResult {
   data: RecommendResponse | null;
@@ -72,7 +43,7 @@ export function useRecommendations(): UseRecommendationsResult {
           },
         });
       }
-    } catch (err) {
+    } catch {
       const fallback = getMockRecommendations(request.language);
       setData({
         success: true,

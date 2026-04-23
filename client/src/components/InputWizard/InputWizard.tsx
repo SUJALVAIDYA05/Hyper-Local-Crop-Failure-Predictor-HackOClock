@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
 import { DISTRICTS, CROPS, GROWTH_STAGES, getMockAnalysis, getMockRecommendations } from '../../data/staticData';
 import { analysisApi, recommendationsApi } from '../../api/client';
+import { useToast } from '../Toast';
 import type { District, Crop, GrowthStage } from '../../types';
 
 const TOTAL_STEPS = 3;
 
 export default function InputWizard() {
   const { state, setDistrict, setCrop, setStage, setAnalysisResult, setRecommendations, setView } = useApp();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,11 +56,13 @@ export default function InputWizard() {
         });
         analysisData = res.data;
         console.info('[InputWizard] ✅ Using live API data');
+        toast('Live satellite & weather data loaded', { variant: 'success' });
       } catch {
         // Use mock data if API is unavailable
         analysisData = getMockAnalysis(state.district.name, state.crop.id, state.stage.id);
         isOffline = true;
         console.warn('[InputWizard] ⚠ API unavailable — using offline estimation');
+        toast('Backend offline — using cached estimates', { variant: 'warning', duration: 4500 });
       }
 
       setAnalysisResult(analysisData);
@@ -85,8 +89,9 @@ export default function InputWizard() {
       }
 
       setView('dashboard');
-    } catch (err) {
+    } catch {
       setError('Analysis failed. Please try again.');
+      toast('Analysis failed — please retry', { variant: 'error' });
       setView('input');
     } finally {
       setLoading(false);
@@ -250,9 +255,8 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
           const isComplete = n < currentStep;
           const isActive = n === currentStep;
           return (
-            <>
+            <Fragment key={`step-${n}`}>
               <div
-                key={`dot-${n}`}
                 style={{
                   width: '32px',
                   height: '32px',
@@ -274,7 +278,6 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
               </div>
               {n < totalSteps && (
                 <div
-                  key={`line-${n}`}
                   style={{
                     flex: 1,
                     height: '2px',
@@ -284,14 +287,27 @@ function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalS
                   }}
                 />
               )}
-            </>
+            </Fragment>
           );
         })}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Outfit, sans-serif' }}>
-        <span>District</span>
-        <span>Crop</span>
-        <span>Stage</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontFamily: 'Outfit, sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
+        {['District', 'Crop', 'Stage'].map((label, idx) => {
+          const n = idx + 1;
+          const isActive = n === currentStep;
+          const isComplete = n < currentStep;
+          return (
+            <span
+              key={label}
+              style={{
+                color: isActive ? '#4ade80' : isComplete ? 'rgba(74,222,128,0.7)' : 'rgba(255,255,255,0.35)',
+                transition: 'color 0.3s ease',
+              }}
+            >
+              {label}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
