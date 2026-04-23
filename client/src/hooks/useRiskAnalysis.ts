@@ -1,36 +1,28 @@
 import { useState, useCallback } from 'react';
-import type { Language } from '../types';
-import { analysisApi } from '../api/client';
-
-export interface AnalysisRequest {
-  district: string;
-  state: string;
-  crop: string;
-  growthStage: string;
-  language: Language;
-}
+import type { AnalyzeResponse } from '../types';
+import { analysisApi, type AnalyzeRequest } from '../api/client';
 
 export interface UseRiskAnalysisResult {
-  data: import('../types').AnalyzeResponse | null;
+  data: AnalyzeResponse | null;
   loading: boolean;
   error: string | null;
-  analyze: (request: AnalysisRequest) => Promise<void>;
+  analyze: (request: AnalyzeRequest) => Promise<void>;
   reset: () => void;
 }
 
 export function useRiskAnalysis(): UseRiskAnalysisResult {
-  const [data, setData] = useState<import('../types').AnalyzeResponse | null>(null);
+  const [data, setData] = useState<AnalyzeResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const analyze = useCallback(async (request: AnalysisRequest) => {
+  const analyze = useCallback(async (request: AnalyzeRequest) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await analysisApi.analyze(request);
       if (response.success) {
-        setData(response as import('../types').AnalyzeResponse);
+        setData(response);
       } else {
         setError(response.error?.message || 'Analysis failed');
       }

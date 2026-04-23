@@ -6,6 +6,8 @@ import InputWizard from './components/InputWizard/InputWizard';
 import RiskDashboard from './components/RiskDashboard/RiskDashboard';
 import RecommendationsPanel from './components/RecommendationsPanel/RecommendationsPanel';
 import LoadingScreen from './components/LoadingScreen';
+import RootErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 import './index.css';
 
 // ============================================================
@@ -113,8 +115,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <RootErrorBoundary>
+      <ToastProvider>
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </ToastProvider>
+    </RootErrorBoundary>
   );
 }

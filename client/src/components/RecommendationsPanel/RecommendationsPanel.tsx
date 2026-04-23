@@ -6,6 +6,7 @@ import { speakRecommendations, stopSpeaking } from '../../utils/speech';
 import RecommendationCard from './RecommendationCard';
 import LanguageToggle from './LanguageToggle';
 import PDFExport from './PDFExport';
+import CostSummary from './CostSummary';
 
 export default function RecommendationsPanel() {
   const { state, setLanguage, setView } = useApp();
@@ -169,6 +170,11 @@ export default function RecommendationsPanel() {
             </div>
           )}
         </div>
+
+        {/* Cost Summary */}
+        {recommendations.length > 0 && (
+          <CostSummary recommendations={recommendations} language={language} />
+        )}
 
         {/* PDF Export */}
         <PDFExport />

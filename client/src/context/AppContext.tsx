@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, type ReactNode } from 'react';
-import type { District, Crop, GrowthStage, Language, AppState, AnalyzeResponse, RecommendationItem, RecommendationSummary } from '../types';
+import type { District, Crop, GrowthStage, Language, AppState, AnalyzeResponse, RecommendationItem, RecommendationSummary, MapTheme } from '../types';
 
 // ============================================================
 // Actions
